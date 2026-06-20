@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/api_client.dart';
 import '../models/models.dart';
 import '../services/api_services.dart';
+import '../services/push_service.dart';
 
 /// Autentifikatsiya holati.
 class AuthState {
@@ -37,13 +38,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final user = await AuthService.me();
       state = state.copyWith(user: user, initialized: true);
+      PushService.register();
     } catch (_) {
       await ApiClient.instance.clear();
       state = state.copyWith(initialized: true);
     }
   }
 
-  void setUser(UserModel user) => state = state.copyWith(user: user);
+  void setUser(UserModel user) {
+    state = state.copyWith(user: user);
+    PushService.register();
+  }
 
   Future<void> logout() async {
     await AuthService.logout();

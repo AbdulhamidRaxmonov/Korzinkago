@@ -73,9 +73,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final orderId = res['order']['id'] as int;
       await ref.read(cartProvider.notifier).load();
 
-      // Payme to'lov bo'lsa, checkout sahifasini ochamiz
+      // Onlayn to'lov bo'lsa, checkout sahifasini ochamiz
       if (res['needs_payment'] == true) {
-        final url = await OrderService.paymeCheckout(orderId);
+        final method = res['payment_method'] ?? _paymentMethod;
+        final url = method == 'click'
+            ? await OrderService.clickCheckout(orderId)
+            : await OrderService.paymeCheckout(orderId);
         if (!mounted) return;
         await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => PaymeWebView(url: url)),

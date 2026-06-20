@@ -17,8 +17,22 @@ return [
         'account_field' => env('PAYME_ACCOUNT_FIELD', 'order_id'),
     ],
 
+    'click' => [
+        'service_id' => env('CLICK_SERVICE_ID'),
+        'merchant_id' => env('CLICK_MERCHANT_ID'),
+        'secret_key' => env('CLICK_SECRET_KEY'),
+        'merchant_user_id' => env('CLICK_MERCHANT_USER_ID'),
+        'checkout_url' => env('CLICK_CHECKOUT_URL', 'https://my.click.uz'),
+    ],
+
     'google_maps' => [
         'key' => env('GOOGLE_MAPS_API_KEY'),
+    ],
+
+    'fcm' => [
+        'project_id' => env('FCM_PROJECT_ID'),
+        'credentials' => env('FCM_CREDENTIALS_PATH', storage_path('app/firebase-credentials.json')),
+        'fake' => (bool) env('FCM_FAKE', false),
     ],
 
     'delivery' => [

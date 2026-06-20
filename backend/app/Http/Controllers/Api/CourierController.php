@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\FcmService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CourierController extends Controller
 {
+    public function __construct(protected FcmService $fcm)
+    {
+    }
+
     /**
      * Kuryer online/offline holatini o'zgartirish.
      */
@@ -90,6 +95,11 @@ class CourierController extends Controller
 
         $order->logStatus('on_way', $request->user()->id, 'Kuryer qabul qildi');
 
+        $this->fcm->sendToUser($order->user_id, 'Kuryer yo\'lda', "{$order->number} buyurtmangizni kuryer yetkazmoqda.", [
+            'order_id' => $order->id,
+            'type' => 'order_on_way',
+        ]);
+
         return response()->json(['success' => true, 'order' => $order->load('items', 'user:id,name,phone')]);
     }
 
@@ -113,6 +123,13 @@ class CourierController extends Controller
         ]);
 
         $order->logStatus($data['status'], $request->user()->id);
+
+        if ($data['status'] === 'delivered') {
+            $this->fcm->sendToUser($order->user_id, 'Buyurtma yetkazildi', "{$order->number} buyurtmangiz yetkazib berildi. Rahmat!", [
+                'order_id' => $order->id,
+                'type' => 'order_delivered',
+            ]);
+        }
 
         return response()->json(['success' => true, 'order' => $order]);
     }

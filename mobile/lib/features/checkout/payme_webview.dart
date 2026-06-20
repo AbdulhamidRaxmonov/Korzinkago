@@ -5,7 +5,8 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// Payme to'lov sahifasini WebView orqali ochish.
 class PaymeWebView extends StatefulWidget {
   final String url;
-  const PaymeWebView({super.key, required this.url});
+  final String title;
+  const PaymeWebView({super.key, required this.url, this.title = 'To\'lov'});
 
   @override
   State<PaymeWebView> createState() => _PaymeWebViewState();
@@ -40,7 +41,7 @@ class _PaymeWebViewState extends State<PaymeWebView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Payme to\'lov')),
+      appBar: AppBar(title: Text(widget.title)),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),

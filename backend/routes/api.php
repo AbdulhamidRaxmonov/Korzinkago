@@ -4,7 +4,9 @@ use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CatalogController;
+use App\Http\Controllers\Api\ClickController;
 use App\Http\Controllers\Api\CourierController;
+use App\Http\Controllers\Api\DeviceTokenController;
 use App\Http\Controllers\Api\MapController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymeController;
@@ -29,6 +31,10 @@ Route::get('products/{product}', [CatalogController::class, 'product']);
 
 // Payme webhook — auth middlewaresiz (o'zining Basic auth tekshiruvi bor)
 Route::post('payme/callback', [PaymeController::class, 'callback']);
+
+// Click webhook'lari — o'zining md5 imzo tekshiruvi bor
+Route::post('click/prepare', [ClickController::class, 'prepare']);
+Route::post('click/complete', [ClickController::class, 'complete']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // Profil
@@ -55,6 +61,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // To'lov
     Route::post('payme/checkout', [PaymeController::class, 'checkout']);
+    Route::post('click/checkout', [ClickController::class, 'checkout']);
+
+    // Push-bildirishnoma uchun qurilma tokenini ro'yxatga olish
+    Route::post('device-token', [DeviceTokenController::class, 'store']);
 
     // Xarita
     Route::post('map/geocode', [MapController::class, 'geocode']);

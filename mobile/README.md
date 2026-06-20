@@ -82,3 +82,14 @@ lib/
 - **Kuryer:** +998 90 765 43 21
 
 > SMS_FAKE=true bo'lganda OTP kod API javobida (va konsolda) ko'rsatiladi.
+
+
+## Push-bildirishnomalar (Firebase FCM)
+
+1. [Firebase Console](https://console.firebase.google.com) da loyiha yarating.
+2. Android uchun `google-services.json` ni `android/app/` ga, iOS uchun `GoogleService-Info.plist` ni `ios/Runner/` ga joylang.
+3. `flutterfire configure` ishga tushiring yoki `firebase_core` hujjatiga amal qiling.
+4. Android `android/build.gradle` va `android/app/build.gradle` ga Google Services plagin qo'shing.
+5. Backend tomonda Firebase service account JSON kalitini `backend/storage/app/firebase-credentials.json` ga joylang va `.env` da `FCM_PROJECT_ID`, `FCM_FAKE=false` qiling.
+
+Ilovaga kirilganda token avtomatik backendga (`POST /api/device-token`) yuboriladi. Buyurtma holati o'zgarganda foydalanuvchiga push keladi.

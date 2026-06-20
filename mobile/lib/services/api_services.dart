@@ -144,6 +144,11 @@ class OrderService {
     final res = await _dio.post('/payme/checkout', data: {'order_id': orderId});
     return res.data['checkout_url'];
   }
+
+  static Future<String> clickCheckout(int orderId) async {
+    final res = await _dio.post('/click/checkout', data: {'order_id': orderId});
+    return res.data['checkout_url'];
+  }
 }
 
 /// Kuryer servisi.

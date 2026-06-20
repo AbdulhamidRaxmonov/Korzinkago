@@ -6,14 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Store;
 use App\Services\DeliveryService;
+use App\Services\FcmService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function __construct(protected DeliveryService $delivery)
-    {
+    public function __construct(
+        protected DeliveryService $delivery,
+        protected FcmService $fcm,
+    ) {
     }
 
     /**
@@ -164,11 +167,17 @@ class OrderController extends Controller
 
         $order->load('items');
 
+        $this->fcm->sendToUser($user, 'Buyurtma qabul qilindi', "{$order->number} raqamli buyurtmangiz qabul qilindi.", [
+            'order_id' => $order->id,
+            'type' => 'order_created',
+        ]);
+
         return response()->json([
             'success' => true,
             'order' => $order,
-            // payme bo'lsa, frontend /payme/checkout ga yo'naltiradi
-            'needs_payment' => $data['payment_method'] === 'payme',
+            // Onlayn to'lov bo'lsa, frontend tegishli checkout sahifasiga yo'naltiradi
+            'needs_payment' => in_array($data['payment_method'], ['payme', 'click']),
+            'payment_method' => $data['payment_method'],
         ], 201);
     }
 
