@@ -3,7 +3,7 @@
 
 @section('content')
     <div class="bg-white rounded-xl p-6 max-w-2xl">
-        <form method="POST" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}" class="space-y-4">
+        <form method="POST" action="{{ $product->exists ? route('admin.products.update', $product) : route('admin.products.store') }}" class="space-y-4" enctype="multipart/form-data">
             @csrf
             @if ($product->exists) @method('PUT') @endif
 
@@ -45,8 +45,22 @@
                     <input name="step" type="number" step="0.001" value="{{ old('step', $product->step ?? 1) }}" class="w-full border rounded-lg px-3 py-2">
                 </div>
                 <div class="col-span-2">
-                    <label class="block text-sm mb-1">Rasm URL</label>
-                    <input name="image" value="{{ old('image', $product->image) }}" class="w-full border rounded-lg px-3 py-2">
+                    <label class="block text-sm mb-1">Rasm yuklash</label>
+                    @if ($product->exists && $product->image)
+                        <img src="{{ $product->image }}" alt="" class="w-24 h-24 object-cover rounded-lg mb-2 border">
+                    @endif
+                    <input type="file" name="image_file" accept="image/*"
+                           class="w-full border rounded-lg px-3 py-2 bg-white">
+                    <p class="text-xs text-gray-400 mt-1">JPG/PNG, 4MB gacha. Yuklansa, quyidagi URL e'tiborga olinmaydi.</p>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm mb-1">Yoki rasm URL</label>
+                    @php
+                        $raw = $product->getRawOriginal('image');
+                        $urlValue = ($raw && Str::startsWith($raw, 'http')) ? $raw : '';
+                    @endphp
+                    <input name="image" value="{{ old('image', $urlValue) }}"
+                           placeholder="https://..." class="w-full border rounded-lg px-3 py-2">
                 </div>
                 <div class="col-span-2">
                     <label class="block text-sm mb-1">Tavsif</label>

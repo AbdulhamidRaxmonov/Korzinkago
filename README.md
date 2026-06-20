@@ -35,6 +35,7 @@ composer install
 php artisan key:generate
 # .env da MySQL, ESKIZ, PAYME, GOOGLE_MAPS sozlamalarini kiriting
 php artisan migrate --seed
+php artisan storage:link
 php artisan serve
 ```
 
@@ -52,9 +53,20 @@ flutter run
 - ✅ Savat (qo'shish/o'chirish/miqdor)
 - ✅ Manzillar (Google Map orqali tanlash)
 - ✅ Buyurtma berish va real-time status
-- ✅ Payme orqali onlayn to'lov + naqd to'lov
+- ✅ Payme va Click orqali onlayn to'lov + naqd to'lov
+- ✅ Promokod / chegirma tizimi (foiz yoki qat'iy summa, limitlar, muddat)
+- ✅ Mahsulotga rasm yuklash (admin paneldan upload)
+- ✅ FCM push-bildirishnomalar (buyurtma holati o'zgarganda)
 - ✅ Kuryer: buyurtmalarni qabul qilish, xaritada yo'nalish, statusni yangilash
+- ✅ Admin panel: statistika, buyurtmalar, mahsulotlar, kategoriyalar, promokodlar, kuryerlar
 - ✅ Yetkazib berish narxi masofaga qarab hisoblanadi
+
+## Admin panel
+`http://localhost:8000/admin` — demo: `998900000000` / `admin123`
+
+## Test promokodlar (seed)
+- `WELCOME10` — 10% chegirma (faqat birinchi buyurtma, min 50 000 so'm, max 20 000)
+- `KORZINKA15000` — 15 000 so'm chegirma (min 100 000 so'm)
 
 ## API hujjati
 `backend/routes/api.php` faylida barcha endpointlar. Asosiylari:

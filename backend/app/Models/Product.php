@@ -34,6 +34,23 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * Rasmni to'liq URL ko'rinishida qaytarish.
+     * Yuklangan fayl bo'lsa /storage/... ga aylantiriladi, URL bo'lsa o'zgarmaydi.
+     */
+    public function getImageAttribute(?string $value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        return rtrim(config('app.url'), '/').'/storage/'.ltrim($value, '/');
+    }
+
     public function getHasDiscountAttribute(): bool
     {
         return $this->old_price !== null && $this->old_price > $this->price;

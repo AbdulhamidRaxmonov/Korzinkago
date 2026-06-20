@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Store;
 use App\Services\DeliveryService;
 use App\Services\FcmService;
+use App\Services\PromoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ class OrderController extends Controller
     public function __construct(
         protected DeliveryService $delivery,
         protected FcmService $fcm,
+        protected PromoService $promoService,
     ) {
     }
 
@@ -87,6 +89,7 @@ class OrderController extends Controller
             'comment' => ['nullable', 'string', 'max:500'],
             'recipient_phone' => ['nullable', 'string', 'max:20'],
             'payment_method' => ['required', 'in:cash,payme,click,card'],
+            'promo_code' => ['nullable', 'string', 'max:50'],
         ]);
 
         $user = $request->user();
@@ -119,9 +122,24 @@ class OrderController extends Controller
         $distance = $store ? $this->delivery->distanceKm($store->lat, $store->lng, $lat, $lng) : 0;
         $deliveryFee = $this->delivery->calculateFee($distance, $itemsTotal);
 
+        // Promokodni tekshirish va chegirmani hisoblash
+        $discount = 0;
+        $appliedPromo = null;
+        if (! empty($data['promo_code'])) {
+            $promoResult = $this->promoService->validate($data['promo_code'], $user, $itemsTotal);
+            if (! $promoResult['valid']) {
+                return response()->json(['message' => $promoResult['message']], 422);
+            }
+            $discount = $promoResult['discount'];
+            $appliedPromo = $promoResult['promo'];
+        }
+
+        $total = max(0, $itemsTotal - $discount) + $deliveryFee;
+
         $order = DB::transaction(function () use (
             $user, $cartItems, $store, $itemsTotal, $deliveryFee, $distance,
-            $deliveryAddress, $lat, $lng, $entrance, $floor, $apartment, $data
+            $deliveryAddress, $lat, $lng, $entrance, $floor, $apartment, $data,
+            $discount, $total, $appliedPromo
         ) {
             $order = Order::create([
                 'number' => Order::generateNumber(),
@@ -140,8 +158,9 @@ class OrderController extends Controller
                 'recipient_phone' => $data['recipient_phone'] ?? $user->phone,
                 'items_total' => $itemsTotal,
                 'delivery_fee' => $deliveryFee,
-                'discount' => 0,
-                'total' => $itemsTotal + $deliveryFee,
+                'discount' => $discount,
+                'promo_code' => $appliedPromo?->code,
+                'total' => $total,
                 'distance_km' => $distance,
             ]);
 
@@ -157,6 +176,10 @@ class OrderController extends Controller
 
                 $item->product->increment('sold_count', (int) $item->quantity);
                 $item->product->decrement('stock', (int) $item->quantity);
+            }
+
+            if ($appliedPromo) {
+                $this->promoService->recordUsage($appliedPromo, $user, $order, $discount);
             }
 
             $order->logStatus('new', $user->id, 'Buyurtma yaratildi');

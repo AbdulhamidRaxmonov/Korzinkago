@@ -28,6 +28,43 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   bool _calculating = false;
   bool _placing = false;
 
+  final _promoController = TextEditingController();
+  double _discount = 0;
+  String? _promoCode;
+  bool _applyingPromo = false;
+  String? _promoMessage;
+
+  Future<void> _applyPromo() async {
+    final code = _promoController.text.trim();
+    if (code.isEmpty) return;
+    setState(() => _applyingPromo = true);
+    try {
+      final res = await OrderService.applyPromo(code);
+      setState(() {
+        _discount = (res['discount'] as num).toDouble();
+        _promoCode = res['code'];
+        _promoMessage = res['message'];
+      });
+    } catch (e) {
+      setState(() {
+        _discount = 0;
+        _promoCode = null;
+        _promoMessage = ApiClient.errorMessage(e);
+      });
+    } finally {
+      if (mounted) setState(() => _applyingPromo = false);
+    }
+  }
+
+  void _clearPromo() {
+    setState(() {
+      _discount = 0;
+      _promoCode = null;
+      _promoMessage = null;
+      _promoController.clear();
+    });
+  }
+
   Future<void> _pickOnMap() async {
     final result = await context.push<Map<String, dynamic>>('/map-picker');
     if (result != null) {
@@ -68,6 +105,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         'delivery_lng': _lng,
         'comment': _commentController.text,
         'payment_method': _paymentMethod,
+        if (_promoCode != null) 'promo_code': _promoCode,
       });
 
       final orderId = res['order']['id'] as int;
@@ -102,7 +140,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     final notifier = ref.read(cartProvider.notifier);
     final itemsTotal = notifier.total;
-    final total = itemsTotal + _deliveryFee;
+    final total = (itemsTotal - _discount).clamp(0, double.infinity) + _deliveryFee;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Rasmiylashtirish')),
@@ -132,7 +170,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           _paymentTile('payme', 'Payme', Icons.account_balance_wallet_outlined),
           _paymentTile('click', 'Click', Icons.credit_card),
           const SizedBox(height: 16),
+          _section('Promokod'),
+          _promoField(),
+          const SizedBox(height: 16),
           _summaryRow('Mahsulotlar', formatPrice(itemsTotal)),
+          if (_discount > 0)
+            _summaryRow('Chegirma ($_promoCode)', '- ${formatPrice(_discount)}',
+                color: AppColors.primary),
           _summaryRow(
             'Yetkazib berish',
             _calculating
@@ -160,6 +204,59 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
+  Widget _promoField() {
+    final applied = _promoCode != null && _discount > 0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _promoController,
+                enabled: !applied,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(hintText: 'Promokodni kiriting'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            applied
+                ? IconButton(
+                    onPressed: _clearPromo,
+                    icon: const Icon(Icons.close, color: AppColors.danger),
+                  )
+                : SizedBox(
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: _applyingPromo ? null : _applyPromo,
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(90, 54)),
+                      child: _applyingPromo
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2))
+                          : const Text('Qo\'llash'),
+                    ),
+                  ),
+          ],
+        ),
+        if (_promoMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
+            child: Text(
+              _promoMessage!,
+              style: TextStyle(
+                fontSize: 12,
+                color: applied ? AppColors.primary : AppColors.danger,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _section(String t) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(t, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -178,11 +275,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Widget _summaryRow(String label, String value, {bool bold = false}) {
+  Widget _summaryRow(String label, String value, {bool bold = false, Color? color}) {
     final style = TextStyle(
       fontSize: bold ? 18 : 15,
       fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-      color: bold ? AppColors.textPrimary : AppColors.textSecondary,
+      color: color ?? (bold ? AppColors.textPrimary : AppColors.textSecondary),
     );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

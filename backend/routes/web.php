@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CourierManagementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderManagementController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\PromoCodeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -26,6 +27,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Mahsulotlar
         Route::resource('products', ProductController::class)->except('show');
+
+        // Promokodlar
+        Route::resource('promos', PromoCodeController::class)->except('show')->parameters(['promos' => 'promo']);
 
         // Buyurtmalar
         Route::get('orders', [OrderManagementController::class, 'index'])->name('orders.index');

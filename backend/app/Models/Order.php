@@ -17,7 +17,7 @@ class Order extends Model
         'payment_method', 'payment_status',
         'delivery_address', 'delivery_lat', 'delivery_lng',
         'entrance', 'floor', 'apartment', 'comment', 'recipient_phone',
-        'items_total', 'delivery_fee', 'discount', 'total', 'distance_km',
+        'items_total', 'delivery_fee', 'discount', 'promo_code', 'total', 'distance_km',
         'accepted_at', 'delivered_at', 'cancelled_at', 'cancel_reason',
     ];
 

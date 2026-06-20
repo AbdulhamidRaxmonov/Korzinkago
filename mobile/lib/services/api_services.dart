@@ -126,6 +126,12 @@ class OrderService {
     return Map<String, dynamic>.from(res.data);
   }
 
+  /// Promokodni tekshirish/qo'llash. Muvaffaqiyatli bo'lsa chegirma qaytadi.
+  static Future<Map<String, dynamic>> applyPromo(String code) async {
+    final res = await _dio.post('/promo/apply', data: {'code': code});
+    return Map<String, dynamic>.from(res.data);
+  }
+
   static Future<List<Order>> list() async {
     final res = await _dio.get('/orders');
     return (res.data['data'] as List).map((e) => Order.fromJson(e)).toList();

@@ -24,6 +24,7 @@
                 ['admin.orders.index', '📦 Buyurtmalar'],
                 ['admin.products.index', '🏷️ Mahsulotlar'],
                 ['admin.categories.index', '📁 Kategoriyalar'],
+                ['admin.promos.index', '🎟️ Promokodlar'],
                 ['admin.couriers.index', '🛵 Kuryerlar'],
             ]; @endphp
             @foreach ($nav as [$route, $label])
