@@ -46,6 +46,8 @@ class OrderManagementController extends Controller
         $order->update(['status' => $data['status']]);
         $order->logStatus($data['status'], auth()->id(), 'Admin tomonidan o\'zgartirildi');
 
+        broadcast(new \App\Events\OrderStatusUpdated($order));
+
         $this->fcm->sendToUser($order->user_id, 'Buyurtma holati', "{$order->number}: yangi holat — {$data['status']}", [
             'order_id' => $order->id,
         ]);

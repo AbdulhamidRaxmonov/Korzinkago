@@ -116,3 +116,35 @@ final ordersProvider = FutureProvider.autoDispose((ref) => OrderService.list());
 
 /// Manzillar.
 final addressesProvider = FutureProvider.autoDispose((ref) => AddressService.list());
+
+/// Sevimlilar holati (mahsulot ID'lari to'plami).
+class FavoritesNotifier extends StateNotifier<Set<int>> {
+  FavoritesNotifier() : super({});
+
+  Future<void> load() async {
+    try {
+      final ids = await FavoriteService.ids();
+      state = ids.toSet();
+    } catch (_) {}
+  }
+
+  bool isFavorite(int productId) => state.contains(productId);
+
+  Future<void> toggle(int productId) async {
+    // Optimistik yangilash
+    final wasFav = state.contains(productId);
+    state = wasFav ? (state.toSet()..remove(productId)) : (state.toSet()..add(productId));
+    try {
+      await FavoriteService.toggle(productId);
+    } catch (_) {
+      // Xato bo'lsa, qaytaramiz
+      state = wasFav ? (state.toSet()..add(productId)) : (state.toSet()..remove(productId));
+    }
+  }
+}
+
+final favoritesProvider =
+    StateNotifierProvider<FavoritesNotifier, Set<int>>((ref) => FavoritesNotifier());
+
+/// Sevimli mahsulotlar to'liq ro'yxati.
+final favoriteProductsProvider = FutureProvider.autoDispose((ref) => FavoriteService.list());

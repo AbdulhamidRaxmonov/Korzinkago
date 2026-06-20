@@ -72,6 +72,8 @@ class Product {
   final int stock;
   final bool hasDiscount;
   final int discountPercent;
+  final double rating;
+  final int reviewsCount;
 
   Product({
     required this.id,
@@ -86,6 +88,8 @@ class Product {
     this.stock = 0,
     this.hasDiscount = false,
     this.discountPercent = 0,
+    this.rating = 0,
+    this.reviewsCount = 0,
   });
 
   bool get inStock => stock > 0;
@@ -103,6 +107,8 @@ class Product {
         stock: _toInt(j['stock']),
         hasDiscount: j['has_discount'] == true,
         discountPercent: _toInt(j['discount_percent']),
+        rating: _toDouble(j['rating']),
+        reviewsCount: _toInt(j['reviews_count']),
       );
 }
 
@@ -159,6 +165,7 @@ class Address {
 }
 
 class OrderItem {
+  final int? productId;
   final String productName;
   final double price;
   final double quantity;
@@ -166,6 +173,7 @@ class OrderItem {
   final double total;
 
   OrderItem({
+    this.productId,
     required this.productName,
     required this.price,
     required this.quantity,
@@ -174,6 +182,7 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> j) => OrderItem(
+        productId: j['product_id'] == null ? null : _toInt(j['product_id']),
         productName: j['product_name'] ?? '',
         price: _toDouble(j['price']),
         quantity: _toDouble(j['quantity']),

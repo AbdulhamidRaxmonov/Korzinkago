@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Events\CourierLocationUpdated;
+use App\Events\OrderStatusUpdated;
 use App\Models\Order;
 use App\Services\FcmService;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +41,15 @@ class CourierController extends Controller
             'current_lat' => $data['lat'],
             'current_lng' => $data['lng'],
         ]);
+
+        // Faol buyurtmalar bo'yicha mijozlarga jonli lokatsiyani broadcast qilish
+        $activeOrders = Order::where('courier_id', $request->user()->id)
+            ->where('status', 'on_way')
+            ->pluck('id');
+
+        foreach ($activeOrders as $orderId) {
+            broadcast(new CourierLocationUpdated($orderId, (float) $data['lat'], (float) $data['lng']));
+        }
 
         return response()->json(['success' => true]);
     }
@@ -95,6 +106,8 @@ class CourierController extends Controller
 
         $order->logStatus('on_way', $request->user()->id, 'Kuryer qabul qildi');
 
+        broadcast(new OrderStatusUpdated($order));
+
         $this->fcm->sendToUser($order->user_id, 'Kuryer yo\'lda', "{$order->number} buyurtmangizni kuryer yetkazmoqda.", [
             'order_id' => $order->id,
             'type' => 'order_on_way',
@@ -123,6 +136,8 @@ class CourierController extends Controller
         ]);
 
         $order->logStatus($data['status'], $request->user()->id);
+
+        broadcast(new OrderStatusUpdated($order));
 
         if ($data['status'] === 'delivered') {
             $this->fcm->sendToUser($order->user_id, 'Buyurtma yetkazildi', "{$order->number} buyurtmangiz yetkazib berildi. Rahmat!", [

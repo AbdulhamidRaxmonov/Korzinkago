@@ -37,6 +37,8 @@ php artisan key:generate
 php artisan migrate --seed
 php artisan storage:link
 php artisan serve
+# Real-time WebSocket server (alohida terminalda):
+php artisan reverb:start
 ```
 
 ### Mobile
@@ -57,8 +59,11 @@ flutter run
 - ✅ Promokod / chegirma tizimi (foiz yoki qat'iy summa, limitlar, muddat)
 - ✅ Mahsulotga rasm yuklash (admin paneldan upload)
 - ✅ FCM push-bildirishnomalar (buyurtma holati o'zgarganda)
+- ✅ Mahsulot va kuryer reyting/izoh tizimi (1-5 yulduz)
+- ✅ Sevimlilar (wishlist)
+- ✅ Real-time buyurtma kuzatuvi (Laravel Reverb WebSocket — status + kuryer lokatsiyasi jonli)
 - ✅ Kuryer: buyurtmalarni qabul qilish, xaritada yo'nalish, statusni yangilash
-- ✅ Admin panel: statistika, buyurtmalar, mahsulotlar, kategoriyalar, promokodlar, kuryerlar
+- ✅ Admin panel: statistika, hisobotlar (grafiklar), buyurtmalar, mahsulotlar, kategoriyalar, promokodlar, kuryerlar
 - ✅ Yetkazib berish narxi masofaga qarab hisoblanadi
 
 ## Admin panel

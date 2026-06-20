@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../core/formatters.dart';
 import '../../core/theme.dart';
 import '../../models/models.dart';
 import '../../services/api_services.dart';
+import '../../services/realtime_service.dart';
 
 /// Buyurtma tafsiloti + real-time kuzatuv (xarita).
 class OrderDetailScreen extends ConsumerStatefulWidget {
@@ -23,18 +25,44 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   bool _loading = true;
   Timer? _timer;
   GoogleMapController? _mapController;
+  final RealtimeService _realtime = RealtimeService();
+  double? _liveLat;
+  double? _liveLng;
 
   @override
   void initState() {
     super.initState();
     _load();
-    // Har 15 sekundda yangilab turish (kuryer lokatsiyasi uchun)
-    _timer = Timer.periodic(const Duration(seconds: 15), (_) => _load(silent: true));
+    _connectRealtime();
+    // Zaxira sifatida har 30 sekundda yangilash (WebSocket ishlamasa)
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _load(silent: true));
+  }
+
+  Future<void> _connectRealtime() async {
+    try {
+      await _realtime.subscribeToOrder(
+        widget.orderId,
+        onStatus: (data) {
+          // Status o'zgarganda to'liq ma'lumotni qayta yuklaymiz
+          _load(silent: true);
+        },
+        onLocation: (lat, lng) {
+          if (!mounted) return;
+          setState(() {
+            _liveLat = lat;
+            _liveLng = lng;
+          });
+          _mapController?.animateCamera(CameraUpdate.newLatLng(LatLng(lat, lng)));
+        },
+      );
+    } catch (_) {}
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _realtime.unsubscribe(widget.orderId);
+    _realtime.disconnect();
     super.dispose();
   }
 
@@ -64,7 +92,7 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   if (o.status != 'cancelled') _statusTimeline(o),
-                  if (o.courier?.lat != null) _trackingMap(o),
+                  if (o.courier?.lat != null || _liveLat != null) _trackingMap(o),
                   const SizedBox(height: 16),
                   _card('Manzil', [
                     Text(o.deliveryAddress),
@@ -123,6 +151,17 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
                       ),
                       child: const Text('Buyurtmani bekor qilish'),
                     ),
+                  if (o.status == 'delivered')
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        await context.push('/review', extra: o);
+                        _load(silent: true);
+                      },
+                      icon: const Icon(Icons.star_outline),
+                      label: const Text('Baho berish'),
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(48)),
+                    ),
                 ],
               ),
             ),
@@ -170,7 +209,10 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
   }
 
   Widget _trackingMap(Order o) {
-    final courierPos = LatLng(o.courier!.lat!, o.courier!.lng!);
+    final courierPos = LatLng(
+      _liveLat ?? o.courier?.lat ?? o.deliveryLat,
+      _liveLng ?? o.courier?.lng ?? o.deliveryLng,
+    );
     final destPos = LatLng(o.deliveryLat, o.deliveryLng);
     return Padding(
       padding: const EdgeInsets.only(top: 16),

@@ -10,7 +10,9 @@ import '../features/catalog/category_screen.dart';
 import '../features/catalog/product_screen.dart';
 import '../features/checkout/checkout_screen.dart';
 import '../features/checkout/map_picker_screen.dart';
+import '../features/favorites/favorites_screen.dart';
 import '../features/orders/order_detail_screen.dart';
+import '../features/orders/review_screen.dart';
 import '../features/courier/courier_home.dart';
 import '../features/courier/courier_order_screen.dart';
 import '../models/models.dart';
@@ -69,6 +71,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/order/:id',
         builder: (_, s) => OrderDetailScreen(orderId: int.parse(s.pathParameters['id']!)),
+      ),
+      GoRoute(path: '/favorites', builder: (_, __) => const FavoritesScreen()),
+      GoRoute(
+        path: '/review',
+        builder: (_, s) => ReviewScreen(order: s.extra as Order),
       ),
 
       // Courier

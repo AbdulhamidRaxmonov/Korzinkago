@@ -39,6 +39,7 @@ class ProfileScreen extends ConsumerWidget {
             Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const AddressesScreen()));
           }),
+          _tile(Icons.favorite_border, 'Sevimlilar', () => context.push('/favorites')),
           _tile(Icons.receipt_long_outlined, 'Buyurtmalar tarixi',
               () => context.go('/orders')),
           _tile(Icons.headset_mic_outlined, 'Qo\'llab-quvvatlash', () {}),

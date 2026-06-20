@@ -18,6 +18,7 @@ class ProductCard extends ConsumerWidget {
     final notifier = ref.read(cartProvider.notifier);
     final qty = notifier.quantityOf(product.id);
     final item = notifier.itemOf(product.id);
+    final isFav = ref.watch(favoritesProvider).contains(product.id);
 
     return GestureDetector(
       onTap: () => context.push('/product', extra: product),
@@ -61,6 +62,25 @@ class ProductCard extends ConsumerWidget {
                               fontWeight: FontWeight.bold)),
                     ),
                   ),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: InkWell(
+                    onTap: () => ref.read(favoritesProvider.notifier).toggle(product.id),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.white70,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isFav ? Icons.favorite : Icons.favorite_border,
+                        size: 18,
+                        color: isFav ? AppColors.danger : Colors.grey,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
             Padding(
@@ -74,6 +94,19 @@ class ProductCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                   ),
+                  if (product.reviewsCount > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.star, size: 13, color: AppColors.accent),
+                          const SizedBox(width: 2),
+                          Text('${product.rating} (${product.reviewsCount})',
+                              style: const TextStyle(
+                                  fontSize: 11, color: AppColors.textSecondary)),
+                        ],
+                      ),
+                    ),
                   const SizedBox(height: 6),
                   Text(formatPrice(product.price),
                       style: const TextStyle(

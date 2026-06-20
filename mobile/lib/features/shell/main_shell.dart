@@ -32,8 +32,11 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   void initState() {
     super.initState();
-    // Savatni boshlang'ich yuklash
-    Future.microtask(() => ref.read(cartProvider.notifier).load());
+    // Savat va sevimlilarni boshlang'ich yuklash
+    Future.microtask(() {
+      ref.read(cartProvider.notifier).load();
+      ref.read(favoritesProvider.notifier).load();
+    });
   }
 
   @override

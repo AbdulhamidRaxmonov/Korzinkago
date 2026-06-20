@@ -21,6 +21,7 @@
         <nav class="flex-1 p-3 space-y-1 text-sm">
             @php $nav = [
                 ['admin.dashboard', '📊 Boshqaruv paneli'],
+                ['admin.reports', '📈 Hisobotlar'],
                 ['admin.orders.index', '📦 Buyurtmalar'],
                 ['admin.products.index', '🏷️ Mahsulotlar'],
                 ['admin.categories.index', '📁 Kategoriyalar'],

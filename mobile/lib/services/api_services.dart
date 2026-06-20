@@ -157,6 +157,36 @@ class OrderService {
   }
 }
 
+/// Sevimlilar (wishlist) servisi.
+class FavoriteService {
+  static Future<List<Product>> list() async {
+    final res = await _dio.get('/favorites');
+    return (res.data as List).map((e) => Product.fromJson(e)).toList();
+  }
+
+  static Future<List<int>> ids() async {
+    final res = await _dio.get('/favorites/ids');
+    return (res.data as List).map((e) => e as int).toList();
+  }
+
+  static Future<bool> toggle(int productId) async {
+    final res = await _dio.post('/favorites/toggle', data: {'product_id': productId});
+    return res.data['favorited'] == true;
+  }
+}
+
+/// Baho va izohlar servisi.
+class ReviewService {
+  static Future<Map<String, dynamic>> productReviews(int productId) async {
+    final res = await _dio.get('/products/$productId/reviews');
+    return Map<String, dynamic>.from(res.data);
+  }
+
+  static Future<void> submit(Map<String, dynamic> data) async {
+    await _dio.post('/reviews', data: data);
+  }
+}
+
 /// Kuryer servisi.
 class CourierService {
   static Future<bool> toggleOnline(bool online) async {

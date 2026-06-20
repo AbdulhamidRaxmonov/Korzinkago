@@ -7,10 +7,12 @@ use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\ClickController;
 use App\Http\Controllers\Api\CourierController;
 use App\Http\Controllers\Api\DeviceTokenController;
+use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\MapController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymeController;
 use App\Http\Controllers\Api\PromoController;
+use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,6 +31,7 @@ Route::get('home', [CatalogController::class, 'home']);
 Route::get('categories', [CatalogController::class, 'categories']);
 Route::get('products', [CatalogController::class, 'products']);
 Route::get('products/{product}', [CatalogController::class, 'product']);
+Route::get('products/{product}/reviews', [ReviewController::class, 'productReviews']);
 
 // Payme webhook — auth middlewaresiz (o'zining Basic auth tekshiruvi bor)
 Route::post('payme/callback', [PaymeController::class, 'callback']);
@@ -66,6 +69,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Promokod
     Route::post('promo/apply', [PromoController::class, 'apply']);
+
+    // Sevimlilar (wishlist)
+    Route::get('favorites', [FavoriteController::class, 'index']);
+    Route::get('favorites/ids', [FavoriteController::class, 'ids']);
+    Route::post('favorites/toggle', [FavoriteController::class, 'toggle']);
+
+    // Baho va izohlar
+    Route::post('reviews', [ReviewController::class, 'store']);
 
     // Push-bildirishnoma uchun qurilma tokenini ro'yxatga olish
     Route::post('device-token', [DeviceTokenController::class, 'store']);

@@ -15,7 +15,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'phone', 'email', 'password', 'role', 'avatar',
         'is_active', 'is_online', 'current_lat', 'current_lng', 'vehicle_type',
-        'phone_verified_at',
+        'phone_verified_at', 'rating', 'reviews_count',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -60,5 +60,21 @@ class User extends Authenticatable
     public function deliveries(): HasMany
     {
         return $this->hasMany(Order::class, 'courier_id');
+    }
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /** Kuryer sifatida olgan baholar */
+    public function courierReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'courier_id')->where('type', 'courier');
     }
 }

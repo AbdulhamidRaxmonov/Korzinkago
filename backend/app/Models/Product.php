@@ -14,6 +14,7 @@ class Product extends Model
         'category_id', 'name', 'name_ru', 'slug', 'description',
         'image', 'images', 'price', 'old_price', 'unit', 'step',
         'stock', 'barcode', 'is_active', 'is_featured', 'sold_count',
+        'rating', 'reviews_count',
     ];
 
     protected $casts = [
@@ -25,6 +26,8 @@ class Product extends Model
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
         'sold_count' => 'integer',
+        'rating' => 'float',
+        'reviews_count' => 'integer',
     ];
 
     protected $appends = ['has_discount', 'discount_percent', 'in_stock'];
@@ -73,6 +76,11 @@ class Product extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class)->where('type', 'product');
     }
 
     public function scopeFeatured($query)
