@@ -1,0 +1,50 @@
+name: korzinkago
+description: Korzinkago - yetkazib berish ilovasi (User + Kuryer)
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # State management
+  flutter_riverpod: ^2.5.1
+
+  # Network
+  dio: ^5.4.3+1
+
+  # Local storage
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.2.2
+
+  # Routing
+  go_router: ^14.1.2
+
+  # Maps & location
+  google_maps_flutter: ^2.6.1
+  geolocator: ^12.0.0
+  geocoding: ^3.0.0
+
+  # Payment (WebView for Payme checkout)
+  webview_flutter: ^4.8.0
+  url_launcher: ^6.3.0
+
+  # UI
+  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.10+1
+  intl: ^0.19.0
+  pin_code_fields: ^8.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
